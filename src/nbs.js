@@ -1,3 +1,6 @@
+function NBS() {
 
+}
+NBS.prototype.server = require('./server')
 
-const express = require('express')
+module.exports = NBS
