@@ -1,0 +1,16 @@
+{
+  "name": "nbs",
+  "version": "0.0.1",
+  "description": "A node library for doing everything, with out the bs.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js"
+  },
+  "author": "Dylan Hanner",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.3",
+    "node-uuid": "^1.4.8"
+  }
+}
