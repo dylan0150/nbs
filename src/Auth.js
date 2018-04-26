@@ -3,7 +3,7 @@ const aes    = require('aes256')
 const uuid   = require('node-uuid')
 const jwt    = require('jsonwebtoken')
 
-const tk     = require('./toolkit')
+const tk     = require('./Toolkit')
 
 function Auth(config) {
 	this.config = config
