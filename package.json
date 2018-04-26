@@ -1,6 +1,6 @@
 {
   "name": "nbs_framework",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A node framework for running a web api using express and json web tokens, with out the bs.",
   "main": "index.js",
   "scripts": {
