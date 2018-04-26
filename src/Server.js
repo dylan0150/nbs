@@ -12,14 +12,16 @@ const Server = function(config) {
 	const defer = new tk.Deferrer()
 	const app   = express()
 
-	config.response_headers["Access-Control-Allow-Origin"]  = "*"
-	config.response_headers["Access-Control-Allow-Headers"] = "Origin, X-Requested-With, Content-Type, Accept"
-
-	app.use(express.static(config.webroot))
+	if ( typeof config.webroot != "undefined" ) {
+		app.use(express.static(config.webroot))
+	}
+	
 	app.use(bodyParser.json())
 	app.use(function(request, response, next) {
-		for ( var header in config.response_headers ) {
-			response.header( header, config.response_headers[header] )
+		if ( typeof config.response_headers != "undefined" ) {
+			for ( var header in config.response_headers ) {
+				response.header( header, config.response_headers[header] )
+			}
 		}
 		next()
 	})
