@@ -12,16 +12,11 @@ const Server = function(config) {
 	const defer = new tk.Deferrer()
 	const app   = express()
 
-	if ( typeof config.webroot != "undefined" ) {
-		app.use(express.static(config.webroot))
-	}
-	
+	app.use(express.static(config.webroot))
 	app.use(bodyParser.json())
 	app.use(function(request, response, next) {
-		if ( typeof config.response_headers != "undefined" ) {
-			for ( var header in config.response_headers ) {
-				response.header( header, config.response_headers[header] )
-			}
+		for ( var header in config.response_headers ) {
+		  response.header( header, config.response_headers[header] )
 		}
 		next()
 	})
@@ -40,12 +35,10 @@ const Server = function(config) {
 Server.prototype = new EventEmitter()
 Server.prototype.constructor = Server
 Server.prototype.route = function(method, path, endpoint) {
-	try {
-		var endpoint = require(endpoint)
-	} catch (e) {
-		throw e
-	}
-	this.app[method](path, new Handler( request, response, endpoint ))
+	const self = this;
+	this.app[method](path, function(request, response) {
+		new Handler( request, response, endpoint, self.config.response_headers )
+	})
 }
 
 module.exports = Server

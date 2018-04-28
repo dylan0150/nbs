@@ -1,13 +1,10 @@
 const mysql  = require('mysql')
-const EventEmitter = require('events')
 
 function ORM(db) {
 	this.ready_tables = {}
 	this.events = {}
 	this.db = db
 }
-ORM.prototype = new EventEmitter()
-ORM.prototype.constructor = ORM
 ORM.prototype.on = function(event, callback) {
 	if ( this.events[event] == undefined ) { this.events[event] = [] }
 	this.events[event].push(callback)
@@ -22,22 +19,22 @@ ORM.prototype.event = function(event, params) {
 	}
 }
 ORM.prototype.table = function(table_name, callback) {
-	var self = this 
+	var this_orm = this 
 	this.table_name = table_name
 	this.ready_tables[table_name] = false
 	table_name = table_name
 	this.db.query('CREATE TABLE IF NOT EXISTS '+mysql.escapeId(table_name)+' ( id INT AUTO_INCREMENT PRIMARY KEY )', {}, function(error, results, fields, query) {
-		self.log([arguments[3].sql, !error])
-		self.ready_tables[table_name] = true
-		self.event('ready_table_'+table_name)
+		console.log("ORM :: "+query.sql, error ? ' :: failed' : ' :: success')
+		this_orm.ready_tables[table_name] = true
+		this_orm.event('ready_table_'+table_name)
 		if ( callback instanceof Function ) { callback.apply(null, arguments) }
 	})
 	return this
 }
 ORM.prototype.column = function(column, type, extra, callback, table_name) {
-	var self = this
+	var this_orm = this
 	if ( table_name == undefined ) { table_name = this.table_name }
-	if ( !this.ready_tables[table_name] ) { this.on('ready_table_'+table_name, function(table) { self.column.call(self, column, type, extra, callback, table_name) }); return this; }
+	if ( !this.ready_tables[table_name] ) { this.on('ready_table_'+table_name, function(table) { this_orm.column.call(this_orm, column, type, extra, callback, table_name) }); return this; }
 	this.db.query("SELECT * FROM information_schema.columns WHERE table_name = :table AND table_schema = :schema AND column_name = :column",
 		{
 			table: table_name,
@@ -45,12 +42,12 @@ ORM.prototype.column = function(column, type, extra, callback, table_name) {
 			column: column
 		},
 		function(error, results, fields) {
-			if ( error ) { if ( callback instanceof Function ) { callback.apply(null, arguments) }; return self; }
+			if ( error ) { if ( callback instanceof Function ) { callback.apply(null, arguments) }; return this_orm; }
 			var sql = "ALTER TABLE "+mysql.escapeId(table_name)
 			sql += results.length == 0 ? " ADD " : " MODIFY ";
-			sql += "COLUMN "+mysql.escapeId(column)+" "+self.parseType(type)+" "+self.parseExtra(extra)
-			self.db.query(sql, {}, function(error) {
-				self.log([arguments[3].sql, !error])
+			sql += "COLUMN "+mysql.escapeId(column)+" "+this_orm.parseType(type)+" "+this_orm.parseExtra(extra)
+			this_orm.db.query(sql, {}, function(error) {
+				console.log("ORM :: "+arguments[3].sql, error?' :: failed':' :: success')
 				if ( callback instanceof Function ) { callback.apply(null, arguments) }
 			})
 		}
@@ -58,18 +55,18 @@ ORM.prototype.column = function(column, type, extra, callback, table_name) {
 	return this;
 }
 ORM.prototype.drop = function(column_name, callback, table_name) {
-	var self = this
+	var this_orm = this
 	if ( table_name == undefined ) { table_name = this.table_name }
-	if ( !this.ready_tables[table_name] ) { this.on('ready_table_'+table_name, function(table) { self.drop.call(self, column_name, callback, table_name) }); return this; }
+	if ( !this.ready_tables[table_name] ) { this.on('ready_table_'+table_name, function(table) { this_orm.drop.call(this_orm, column_name, callback, table_name) }); return this; }
 	if ( typeof column_name == 'undefined' ) {
 		this.ready_tables[table_name] = false
 		this.db.query("DROP TABLE IF EXISTS "+mysql.escapeId(table_name), {}, function(error) {
-			self.log([arguments[3].sql, !error])
+			console.log("ORM :: "+arguments[3].sql, error?' :: failed':' :: success')
 			if ( callback instanceof Function ) { callback.apply(null, arguments) }
 		})
 	} else {
 		this.db.query("ALTER TABLE "+mysql.escapeId(table_name)+" DROP COLUMN "+mysql.escapeId(column_name), {}, function(error) {
-			self.log(arguments[3].sql, !error])
+			console.log("ORM :: "+arguments[3].sql, error?' :: failed':' :: success')
 			if ( callback instanceof Function ) { callback.apply(null, arguments) }
 		})
 	}
@@ -123,9 +120,6 @@ ORM.prototype.parseExtra = function(extra) {
 	var string = ""
 	if ( extra && extra.notnull ) { string += " NOT NULL " }
 	return string.trim()
-}
-ORM.prototype.log = function(sql, success) {
-	this.emit("query", sql, success)
 }
 
 module.exports = ORM

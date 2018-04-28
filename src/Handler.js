@@ -3,40 +3,23 @@ const fs = require('fs')
 function RequestHandler( request, response, endpoint ) {
   var self = this;
 
-  this.endpoint = require(endpoint)
-	this.params   = this.parseParams( request.url )
+  this.endpoint = endpoint
+  this.params   = this.parseParams( request.url )
   this.body     = request.body
-	this.request  = request
-	this.response = response
+  this.request  = request
+  this.response = response
   this.status   = 200
   
-  var params = this.body
+  var params = this.body == undefined ? {} : this.body
   for ( var key in this.params ) {
-    
+    params[key] = this.params[key]
   }
 
   if ( typeof params.method != "undefined" ) {
-    this.endpoint[params.method].apply( this, params )
-  }
-}
-RequestHandler.prototype.get = function() {
-  if ( this.params.method ) {
-    this.endpoint[this.params.method](this.params, this.headers.userData, this)
+    this.endpoint[params.method].call( this, params )
   } else {
-    this.endpoint.get(this.params, this.headers.userData, this)
+    this.endpoint[this.request.method].call( this, params )
   }
-  return this
-}
-RequestHandler.prototype.post = function() {
-  for ( var key in this.body ) {
-    this.params[key] = this.body[key]
-  }
-  if ( this.params.method ) {
-    this.endpoint[this.params.method](this.params, this.headers.userData, this)
-  } else {
-    this.endpoint.post(this.params, this.headers.userData, this)
-  }
-  return this
 }
 RequestHandler.prototype.parseParams = function(url) {
   var obj = {}
@@ -48,10 +31,10 @@ RequestHandler.prototype.parseParams = function(url) {
   }
   return obj
 }
-RequestHandler.prototype.respond = function(response, status) {
+RequestHandler.prototype.respond = function(res, status) {
   if ( status != undefined ) { this.status = status }
   this.response.status(this.status)
-  this.response.send(response)
+  this.response.send(res)
   this.response.end()
 }
 

@@ -1,20 +1,16 @@
 const mysql  = require('mysql')
 const tk     = require('./Toolkit')
-const EventEmitter = require('events')
 
 function DB(dbconfig) {
 	this.connections = []
 	this.database = dbconfig.database
 	this.config = dbconfig
 }
-DB.prototype = new EventEmitter()
-DB.prototype.constructor = DB
 DB.prototype.connect = function(callback) {
-	var self = this
+	var this_connection = this
 	var con = new Connection(callback, this.config)
-	this.log("connection.connect", con)
 	con.on('end', function() {
-		self.cleanup()
+		this_connection.cleanup()
 	})
 	this.connections.push(con)
 	return this
@@ -24,7 +20,7 @@ DB.prototype.query = function(sql, params, callback) {
 	var found_available_connection = false
 	for ( var con of this.connections ) {
 		if ( !con.connected ) {
-			con.on('connect', function() { this_db.query(sql, params, callback); this.log("query", sql); })
+			con.on('connect', function() { this_db.query(sql, params, callback) })
 			return this;
 		} else if ( con.available ) {
 			found_available_connection = true;
@@ -51,54 +47,74 @@ DB.prototype.cleanup = function() {
 		var con = this.connections[i]
 		if ( con.timed_out ) {
 			this.connections.splice(i,1)
-			this.log("connection.timeout", con)
+			console.log('DB :: CLEANUP :: Connection Removed :: timeout')
 		}
 	}
 }
-DB.prototype.log = function(event, params) {
-	this.emit(event, params)
+DB.prototype.status = function() {
+	console.log()
+	console.log("DB :: STATUS")
+	console.log("DATABASE "+this.database)
+	var n = 1
+	for ( var connection of this.connections ) {
+		console.log("Connection: "+n+", Status: [ connected:"+connection.connected+", available:"+connection.available+" ]")
+		n++
+	}
+	console.log()
 }
 
 function Connection(callback, config) {
 	this.available  = false;
 	this.connected  = false;
 	this.timed_out  = false;
+	this.events = {}
 	this.connection = mysql.createConnection(config)
 	this.connection.config.queryFormat = this.queryFormat
 
-	var self = this
+	var this_connection = this
 	this.connection.connect(function(error) {
 		if ( !error ) {
-			self.available = true
-			self.connected = true
+			this_connection.available = true
+			this_connection.connected = true
 		} else if ( error.fatal ) {
 			throw error;
 		}
-		self.emit('connect')
-		callback(error, self)
+		this_connection.event('connect')
+		callback(error, this_connection)
 	})
 	this.connection.on('error', function(err) {
-		this.log('DB :: Connection :: ERR :: '+err.code)
-		self.available = false;
+		console.log('DB :: Connection :: ERR :: '+err.code)
+		this_connection.available = false;
 		switch ( err.code ) {
 			case 'PROTOCOL_CONNECTION_LOST':
-				self.timed_out = true;
-				self.emit('end','timeout');
+				this_connection.timed_out = true;
+				this_connection.event('end','timeout');
 			break;
 			default:
 				console.trace('DB :: Connection :: ERR');
 				console.error(err);
-				self.connection.end(function(err) {
-					if (err) { this.log(err) }
-					self.timed_out = true;
-					self.emit('end','timeout');
+				this_connection.connection.end(function(err) {
+					if (err) { console.log(err) }
+					this_connection.timed_out = true;
+					this_connection.event('end','timeout');
 				})
 			break;
 		}
 	})
 }
-Connection.prototype = new EventEmitter()
-Connection.prototype.constructor = Connection
+Connection.prototype.on = function(event, callback) {
+	if ( typeof this.events[event] == 'undefined' ) { this.events[event] = [] }
+	this.events[event].push(callback)
+}
+Connection.prototype.event = function(event, params) {
+	if ( this.events[event] instanceof Array ) {
+		for (var i = this.events[event].length - 1; i >= 0; i--) {
+			var callback = this.events[event][i]
+			if ( callback instanceof Function ) { callback(params) }
+			this.events[event].splice(i,1)
+		}
+	}
+}
 Connection.prototype.queryFormat = function(query, values) {
 	if (!values) { return query }
 	return query.replace(/\:(\w+)/g, function (txt, key) {
@@ -110,9 +126,6 @@ Connection.prototype.queryFormat = function(query, values) {
 	    }
 	    return txt
 	}.bind(this))
-}
-Connection.prototype.log = function(event, params) {
-	this.emit(event, params)
 }
 
 module.exports = DB
