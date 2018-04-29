@@ -1,17 +1,14 @@
 {
   "name": "nbs_framework",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A node framework for running a web api using express and json web tokens, with out the bs.",
   "main": "index.js",
-  "scripts": {
-
-  },
+  "scripts": {},
   "author": "Dylan Hanner",
   "license": "ISC",
   "dependencies": {
     "aes256": "^1.0.3",
     "body-parser": "^1.18.2",
-    "crypto": "^1.0.1",
     "express": "^4.16.3",
     "jsonwebtoken": "^8.2.1",
     "mysql": "^2.15.0",
