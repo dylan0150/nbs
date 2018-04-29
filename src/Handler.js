@@ -9,6 +9,7 @@ function RequestHandler( request, response, endpoint ) {
   this.request  = request
   this.response = response
   this.status   = 200
+  this.set      = false
   
   var params = this.body == undefined ? {} : this.body
   for ( var key in this.params ) {
@@ -32,10 +33,27 @@ RequestHandler.prototype.parseParams = function(url) {
   return obj
 }
 RequestHandler.prototype.respond = function(res, status) {
-  if ( status != undefined ) { this.status = status }
-  this.response.status(this.status)
-  this.response.send(res)
-  this.response.end()
+  try {
+    this.send(res, status)
+    this.end()
+  } catch (e) {
+    console.log(e)
+  }
+}
+RequestHandler.prototype.send = function(data, status) {
+  if ( !this.set ) {
+    if ( status != undefined ) { this.status = status }
+    this.response.status(this.status)
+  }
+  this.set = true
+  this.response.send(data)
+}
+RequestHandler.prototype.end = function() {
+  try {
+    this.response.end()
+  } catch (e) {
+    console.log(e)
+  }
 }
 
 module.exports = RequestHandler

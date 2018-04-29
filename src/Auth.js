@@ -10,9 +10,9 @@ function Auth(config) {
 }
 Auth.prototype.createToken = function(data, key) {
 	if ( typeof key == "undefined" ) {
-		var jwt_key = this.config.keys[key]
-	} else {
 		var jwt_key = this.config.keys.aes
+	} else {
+		var jwt_key = key
 	}
 	var session_expires = typeof config.session_expires == "undefined" ? 60*60 : config.session_expires;
 	return jwt.sign({data:data}, jwt_key, {

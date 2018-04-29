@@ -21,18 +21,29 @@ Deferrer.prototype.wait = function(callback) {
 
 function parseDate(date) {
 	date = new Date(date)
-	function pad(i) { return i < 10 ? "0"+i : ""+i;}
-	function padd(i) { return i < 10 ? "00"+i : i < 100 ? "0"+i : ""+i;}
-	return pad(date.getUTCFullYear())
-		+ "/" +pad(date.getUTCMonth())
-		+ "/" +pad(date.getUTCDate())
-		+ " " +pad(date.getUTCHours())
-		+ "." +pad(date.getUTCMinutes())
-		+ "." +pad(date.getUTCSeconds())
-		+ ".."+padd(date.getUTCMilliseconds())
+	return pad(date.getUTCFullYear(), 4)
+		+ "/" +pad(date.getUTCMonth(), 2)
+		+ "/" +pad(date.getUTCDate(), 2)
+		+ " " +pad(date.getUTCHours(), 2)
+		+ "." +pad(date.getUTCMinutes(), 2)
+		+ "." +pad(date.getUTCSeconds(), 2)
+		+ ".."+pad(date.getUTCMilliseconds(), 3)
+}
+
+function pad(value, length) {
+	let len = 1
+	let mag = 10
+	let padding = ""
+	while ( len < length ) {
+		if ( value < mag ) { padding += "0" }
+		mag *= 10
+		len++
+	}
+	return padding + String(value)
 }
 
 module.exports = {
 	Deferrer: Deferrer,
-	parseDate: parseDate
+	parseDate: parseDate,
+	pad: pad
 }
