@@ -7,20 +7,20 @@ function DB(dbconfig) {
 	this.config = dbconfig
 }
 DB.prototype.connect = function(callback) {
-	var this_connection = this
+	var self = this
 	var con = new Connection(callback, this.config)
 	con.on('end', function() {
-		this_connection.cleanup()
+		self.cleanup()
 	})
 	this.connections.push(con)
 	return this
 }
 DB.prototype.query = function(sql, params, callback) {
-	var this_db = this
+	var self = this
 	var found_available_connection = false
 	for ( var con of this.connections ) {
 		if ( !con.connected ) {
-			con.on('connect', function() { this_db.query(sql, params, callback) })
+			con.on('connect', function() { self.query(sql, params, callback) })
 			return this;
 		} else if ( con.available ) {
 			found_available_connection = true;
@@ -29,7 +29,7 @@ DB.prototype.query = function(sql, params, callback) {
 	}
 	if ( !found_available_connection ) {
 		this.connect(function() {
-			this_db.query(sql, params, callback)
+			self.query(sql, params, callback)
 		})
 		return this;
 	}
@@ -71,32 +71,32 @@ function Connection(callback, config) {
 	this.connection = mysql.createConnection(config)
 	this.connection.config.queryFormat = this.queryFormat
 
-	var this_connection = this
+	var self = this
 	this.connection.connect(function(error) {
 		if ( !error ) {
-			this_connection.available = true
-			this_connection.connected = true
+			self.available = true
+			self.connected = true
 		} else if ( error.fatal ) {
 			throw error;
 		}
-		this_connection.event('connect')
-		callback(error, this_connection)
+		self.event('connect')
+		callback(error, self)
 	})
 	this.connection.on('error', function(err) {
 		console.log('DB :: Connection :: ERR :: '+err.code)
-		this_connection.available = false;
+		self.available = false;
 		switch ( err.code ) {
 			case 'PROTOCOL_CONNECTION_LOST':
-				this_connection.timed_out = true;
-				this_connection.event('end','timeout');
+				self.timed_out = true;
+				self.event('end','timeout');
 			break;
 			default:
 				console.trace('DB :: Connection :: ERR');
 				console.error(err);
-				this_connection.connection.end(function(err) {
+				self.connection.end(function(err) {
 					if (err) { console.log(err) }
-					this_connection.timed_out = true;
-					this_connection.event('end','timeout');
+					self.timed_out = true;
+					self.event('end','timeout');
 				})
 			break;
 		}
