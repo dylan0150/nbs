@@ -3,15 +3,18 @@ const fs = require('fs')
 function RequestHandler( request, response, endpoint ) {
   var self = this;
 
-  this.endpoint = endpoint
-  this.params   = this.parseParams( request.url )
-  this.body     = request.body
-  this.request  = request
-  this.response = response
-  this.status   = 200
-  this.set      = false
+  this.endpoint   = endpoint
+  this.body       = request.body == undefined ? {} : request.body;
+  this.params     = this.parseParams( request.url )
+  this.request    = request
+  this.response   = response
+  this.status     = 200
+  this.set        = false
   
-  var params = this.body == undefined ? {} : this.body
+  var params = this.body
+  for ( var key in this.request.params ) {
+    params[key] = this.request.params[key]
+  }
   for ( var key in this.params ) {
     params[key] = this.params[key]
   }
