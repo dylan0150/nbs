@@ -35,6 +35,9 @@ const Server = function(config) {
 Server.prototype = new EventEmitter()
 Server.prototype.constructor = Server
 Server.prototype.route = function(method, path, endpoint) {
+	if (typeof endpoint == "string") {
+		endpoint = require(endpoint)
+	}
 	const self = this;
 	this.app[method](path, function(request, response) {
 		new Handler( request, response, endpoint, self.config.response_headers )

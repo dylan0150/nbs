@@ -38,10 +38,10 @@ RequestHandler.prototype.parseParams = function(url) {
 RequestHandler.prototype.respond = function(res, status) {
   try {
     this.send(res, status)
-    this.end()
   } catch (e) {
     console.log(e)
   }
+  this.end()
 }
 RequestHandler.prototype.send = function(data, status) {
   if ( !this.set ) {
