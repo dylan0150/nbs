@@ -1,7 +1,7 @@
 const fs = require('fs')
 
 function RequestHandler( request, response, endpoint ) {
-  var self = this;
+  const self = this;
 
   this.endpoint   = endpoint
   this.body       = request.body == undefined ? {} : request.body;
