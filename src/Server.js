@@ -5,12 +5,14 @@ const EventEmitter = require('events');
 const tk          = require('./Toolkit')
 const Handler     = require('./Handler')
 
-const Server = function(config) {
+const Server = function(config, defer) {
 
-	let self    = this
+	const self = this
+	const app  = express()
 
-	const defer = new tk.Deferrer()
-	const app   = express()
+	if ( typeof defer == 'undefined' ) {
+		defer = new tk.Deferrer()
+	}
 
 	app.use(express.static(config.webroot))
 	app.use(bodyParser.json())
