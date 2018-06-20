@@ -12,7 +12,7 @@ Auth.prototype.createToken = function(data, key) {
 	if ( typeof key == "undefined" ) {
 		var jwt_key = this.config.keys.aes
 	} else {
-		var jwt_key = key
+		var jwt_key = this.config.keys[key]
 	}
 	var session_expires = typeof config.session_expires == "undefined" ? 60*60 : config.session_expires;
 	return jwt.sign({data:data}, jwt_key, {
@@ -20,14 +20,24 @@ Auth.prototype.createToken = function(data, key) {
 		expiresIn: session_expires
 	})
 }
-Auth.prototype.refreshToken = function(token) {
-	let data = this.validateToken(token)
+Auth.prototype.refreshToken = function(token, key) {
+	if ( typeof key == "undefined" ) {
+		var jwt_key = this.config.keys.aes
+	} else {
+		var jwt_key = this.config.keys[key]
+	}
+	let data = this.validateToken(token, jwt_key)
 	if ( decoded == null ) { return null }
-	return this.createToken(data)
+	return this.createToken(data, jwt_key)
 }
-Auth.prototype.validateToken = function() {
+Auth.prototype.validateToken = function(token, key) {
+	if ( typeof key == "undefined" ) {
+		var jwt_key = this.config.keys.aes
+	} else {
+		var jwt_key = this.config.keys[key]
+	}
 	try {
-		var decoded = jwt.verify( token, config.security.jwt, {
+		var decoded = jwt.verify( token, jwt_key, {
 			algorithms: ["HS512"],
 			maxAge: config.session_expires
 		})
