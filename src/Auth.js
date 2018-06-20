@@ -28,7 +28,7 @@ Auth.prototype.refreshToken = function(token, key) {
 	}
 	let data = this.validateToken(token, jwt_key)
 	if ( decoded == null ) { return null }
-	return this.createToken(data)
+	return this.createToken(data, jwt_key)
 }
 Auth.prototype.validateToken = function(token, key) {
 	if ( typeof key == "undefined" ) {
