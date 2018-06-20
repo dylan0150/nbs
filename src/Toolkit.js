@@ -1,6 +1,7 @@
 const EventEmitter = require('events')
 
 function Deferrer() {
+	EventEmitter.call(this)
 	this.queue = 0
 	this.events = {}
 }
