@@ -31,7 +31,7 @@ Auth.prototype.validateToken = function(token, key) {
 	} else {
 		var jwt_key = this.config.keys[key]
 	}
-	var session_expires = typeof this.config.session_expires == "undefined" ? 60*60 : config.session_expires;
+	var session_expires = this.config.session_expires == undefined ? 60*60 : this.config.session_expires;
 	try {
 		var decoded = jwt.verify( token, jwt_key, {
 			algorithms: ["HS512"],
