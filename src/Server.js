@@ -82,6 +82,7 @@ Server.prototype.route = function(method, path, endpoint) {
 	})
 }
 Server.prototype.initAuth = function(auth_config) {
+	const self = this
 
 	if ( auth_config != undefined ) {
 		this.config.auth = auth_config
@@ -90,13 +91,13 @@ Server.prototype.initAuth = function(auth_config) {
 	this.auth = new Auth(this.config.auth)
 
 	this.app.use(function(request, response, next) {
-		if ( !this.config.auth.public_urls.includes(request.url) ) {
-			var authentication_token = request.cookies[this.config.auth.cookie_name]
-			var new_token            = this.auth.refreshToken( authentication_token )
+		if ( !self.config.auth.public_urls.includes(request.url) ) {
+			var authentication_token = request.cookies[self.config.auth.cookie_name]
+			var new_token            = self.auth.refreshToken( authentication_token )
 			if ( new_token == null || new_token == undefined ) {
 				response.status(401).end()
 			}
-			response.cookie(this.config.auth.cookie_name, new_token, this.config.auth.cookie_options)
+			response.cookie(self.config.auth.cookie_name, new_token, self.config.auth.cookie_options)
 		}
 
 		next()
