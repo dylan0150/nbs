@@ -299,6 +299,18 @@ mysql@^2.15.0:
     safe-buffer "5.1.1"
     sqlstring "2.3.0"
 
+nbs_framework@0:
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/nbs_framework/-/nbs_framework-0.0.8.tgz#6893eaa10813d1d10d30126db14929c75262c219"
+  dependencies:
+    aes256 "^1.0.3"
+    body-parser "^1.18.2"
+    cookie-parser "^1.4.3"
+    express "^4.16.3"
+    jsonwebtoken "^8.2.1"
+    mysql "^2.15.0"
+    node-uuid "^1.4.8"
+
 negotiator@0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-0.6.1.tgz#2b327184e8992101177b28563fb5e7102acd0ca9"

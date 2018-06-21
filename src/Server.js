@@ -83,7 +83,7 @@ Server.prototype.route = function(method, path, endpoint) {
 }
 Server.prototype.initAuth = function(auth_config) {
 
-	if ( authConfig != undefined ) {
+	if ( auth_config != undefined ) {
 		this.config.auth = auth_config
 	}
 
