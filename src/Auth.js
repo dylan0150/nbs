@@ -23,7 +23,7 @@ Auth.prototype.createToken = function(data, key) {
 Auth.prototype.refreshToken = function(token, key) {
 	let decoded = this.validateToken(token, key)
 	if ( decoded == null ) { return null }
-	return this.createToken(data, key)
+	return this.createToken(decoded, key)
 }
 Auth.prototype.validateToken = function(token, key) {
 	if ( typeof key == "undefined" ) {
