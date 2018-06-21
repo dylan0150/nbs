@@ -72,7 +72,6 @@ Server.prototype = new EventEmitter()
 Server.prototype.constructor = Server
 Server.prototype.route = function(method, path, endpoint) {
 	const self = this;
-
 	this.app[method](path, function(request, response) {
 		if ( endpoint instanceof Function ) {
 			endpoint = endpoint(request, response, Handler)

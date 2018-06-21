@@ -37,9 +37,9 @@ function RequestHandler(request, response, endpoint, server) {
     var method = params.method === undefined
         ? request.method
         : params.method;
-    
-    if ( endpoint[params.method] instanceof Function ) {
-        endpoint[params.method].call(this, params)
+        
+    if ( endpoint[method] instanceof Function ) {
+        endpoint[method].call(this, params)
     } else {
         response.status(404).end()
     }
