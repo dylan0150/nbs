@@ -14,7 +14,7 @@ Auth.prototype.createToken = function(data, key) {
 	} else {
 		var jwt_key = this.config.keys[key]
 	}
-	var session_expires = typeof this.config.session_expires == "undefined" ? 60*60 : config.session_expires;
+	var session_expires = typeof this.config.session_expires == "undefined" ? 60*60 : this.config.session_expires;
 	return jwt.sign({data:data}, jwt_key, {
 		algorithm: "HS512",
 		expiresIn: session_expires

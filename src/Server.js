@@ -95,7 +95,7 @@ Server.prototype.initAuth = function(auth_config) {
 			var authentication_token = request.cookies[self.config.auth.cookie_name]
 			var new_token            = self.auth.refreshToken( authentication_token )
 			if ( new_token == null || new_token == undefined ) {
-				response.status(401).end()
+				return response.status(401).end()
 			}
 			response.cookie(self.config.auth.cookie_name, new_token, self.config.auth.cookie_options)
 		}
