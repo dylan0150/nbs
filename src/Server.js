@@ -78,7 +78,6 @@ Server.prototype.route = function(method, path, endpoint) {
 	} else if (endpoint == undefined) {
 		endpoint = require(process.cwd()+path)
 	}
-	const self = this;
 	this.app[method](path, function(request, response) {
 		new Handler( request, response, endpoint, self )
 	})
