@@ -1,6 +1,11 @@
 const mysql  = require('mysql')
 const tk     = require('./Toolkit')
 
+/**
+ * Database Connection Pool Manager
+ * 
+ * @param {object{host,port,user,password,database...}} dbconfig - https://www.npmjs.com/package/mysql#connection-options
+ */
 function DB(dbconfig) {
 	this.connections = []
 	this.database = dbconfig.database

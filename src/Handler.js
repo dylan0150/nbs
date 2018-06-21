@@ -1,5 +1,18 @@
 const fs = require('fs')
 
+/**
+ * Request Handler
+ * 
+ * 1. Parses request body, urlParams and pathParams
+ * 2. Passes them to an endpoint in priority of url > path > body 
+ * 
+ * @example endpoint.module.exports = { GET: function(params) {}, POST: function(params) {}, ?method=__name__: function(params) {} }
+ * 
+ * @param {express.request}  request 
+ * @param {express.response} response 
+ * @param {object}           endpoint 
+ * @param {nbs.Server}       server 
+ */
 function RequestHandler(request, response, endpoint, server) {
     const self = this;
 
@@ -21,10 +34,14 @@ function RequestHandler(request, response, endpoint, server) {
         params[key] = this.params[key]
     }
 
-    if (typeof params.method != "undefined") {
-        this.endpoint[params.method].call(this, params)
+    var method = params.method === undefined
+        ? request.method
+        : params.method;
+    
+    if ( endpoint[params.method] instanceof Function ) {
+        endpoint[params.method].call(this, params)
     } else {
-        this.endpoint[this.request.method].call(this, params)
+        response.status(404).end()
     }
 }
 RequestHandler.prototype.parseParams = function (url) {

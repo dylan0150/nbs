@@ -12,25 +12,25 @@ const Auth         = require('./Auth')
  * 
  * @param {object} config 
  * @example
-	{
-		host: {
-			port: 8080
-		},
-		webroot: "www",
-		response_headers: {
-			"Access-Control-Allow-Origin": "*"
-		},
-		auth: {
-			cookie_name: "auth",
-			cookie_options: {
-				maxAge: 1000*60*60
-			},
-			keys: {
-				aes: fs.readFileSync("/.keys/aes", 'UTF-8')
-			},
-			public_urls: ['/api/login', '/api/register']
-		}
-	}
+ *	{
+ *		host: {
+ *			port: 8080
+ *		},
+ *		webroot: "www",
+ *		response_headers: {
+ *			"Access-Control-Allow-Origin": "*"
+ *		},
+ *		auth: {
+ *			cookie_name: "auth",
+ *			cookie_options: {
+ *				maxAge: 1000*60*60
+ *			},
+ *			keys: {
+ *				aes: fs.readFileSync("/.keys/aes", 'UTF-8')
+ *			},
+ *			public_urls: ['/api/login', '/api/register']
+ *		}
+ *	}
  * 
  * @param {tk.Deferrer} defer 
  */
@@ -73,13 +73,20 @@ Server.prototype.constructor = Server
 Server.prototype.route = function(method, path, endpoint) {
 	const self = this;
 
-	if (typeof endpoint == "string") {
-		endpoint = require(process.cwd()+endpoint)
-	} else if (endpoint == undefined) {
-		endpoint = require(process.cwd()+path)
-	}
 	this.app[method](path, function(request, response) {
-		new Handler( request, response, endpoint, self )
+		if ( endpoint instanceof Function ) {
+			endpoint = endpoint(request, response, Handler)
+		}
+		
+		if ( endpoint === null ) {
+			return;
+		} else if (typeof endpoint == "string") {
+			endpoint = require(process.cwd()+endpoint)
+		} else if (endpoint === undefined) {
+			endpoint = require(process.cwd()+path)
+		}
+		
+		new Handler(request, response, endpoint, self)
 	})
 
 	return this
