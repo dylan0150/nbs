@@ -71,6 +71,8 @@ const Server = function(config, defer) {
 Server.prototype = new EventEmitter()
 Server.prototype.constructor = Server
 Server.prototype.route = function(method, path, endpoint) {
+	const self = this;
+
 	if (typeof endpoint == "string") {
 		endpoint = require(process.cwd()+endpoint)
 	} else if (endpoint == undefined) {
@@ -78,8 +80,10 @@ Server.prototype.route = function(method, path, endpoint) {
 	}
 	const self = this;
 	this.app[method](path, function(request, response) {
-		new Handler( request, response, endpoint, self.config.response_headers )
+		new Handler( request, response, endpoint, self )
 	})
+
+	return this
 }
 Server.prototype.initAuth = function(auth_config) {
 	const self = this
@@ -102,6 +106,8 @@ Server.prototype.initAuth = function(auth_config) {
 
 		next()
 	})
+
+	return this
 }
 
 module.exports = Server

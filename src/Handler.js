@@ -1,16 +1,17 @@
 const fs = require('fs')
 
-function RequestHandler(request, response, endpoint) {
+function RequestHandler(request, response, endpoint, server) {
     const self = this;
 
+    this.server   = server
     this.endpoint = endpoint
-    this.body = request.body == undefined ? {} : request.body;
-    this.params = this.parseParams(request.url)
-    this.request = request
+    this.body     = request.body == undefined ? {} : request.body;
+    this.params   = this.parseParams(request.url)
+    this.request  = request
     this.response = response
-    this.status = 200
-    this.set = false
-    this.cookies = request.cookies
+    this.status   = 200
+    this.set      = false
+    this.cookies  = request.cookies
 
     var params = this.body
     for (var key in this.request.params) {
@@ -45,6 +46,9 @@ RequestHandler.prototype.respond = function (res, status) {
     this.end()
 }
 RequestHandler.prototype.cookie = function(id, cookie, options) {
+    if ( options == undefined ) {
+        options = this.server.auth.cookie_options
+    }
     this.response.cookie(id, cookie, options)
 }
 RequestHandler.prototype.send = function (data, status) {
