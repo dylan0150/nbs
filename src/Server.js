@@ -5,7 +5,35 @@ const EventEmitter = require('events');
 
 const tk           = require('./Toolkit')
 const Handler      = require('./Handler')
+const Auth         = require('./Auth')
 
+/**
+ * Server Class
+ * 
+ * @param {object} config 
+ * @example
+	{
+		host: {
+			port: 8080
+		},
+		webroot: "www",
+		response_headers: {
+			"Access-Control-Allow-Origin": "*"
+		},
+		auth: {
+			cookie_name: "auth",
+			cookie_options: {
+				maxAge: 1000*60*60
+			},
+			keys: {
+				aes: fs.readFileSync("/.keys/aes", 'UTF-8')
+			},
+			public_urls: ['/api/login', '/api/register']
+		}
+	}
+ * 
+ * @param {tk.Deferrer} defer 
+ */
 const Server = function(config, defer) {
 	EventEmitter.call(this)
 
@@ -51,6 +79,27 @@ Server.prototype.route = function(method, path, endpoint) {
 	const self = this;
 	this.app[method](path, function(request, response) {
 		new Handler( request, response, endpoint, self.config.response_headers )
+	})
+}
+Server.prototype.initAuth = function(auth_config) {
+
+	if ( authConfig != undefined ) {
+		this.config.auth = auth_config
+	}
+
+	this.auth = new Auth(this.config.auth)
+
+	this.app.use(function(request, response, next) {
+		if ( !this.config.auth.public_urls.includes(request.url) ) {
+			var authentication_token = request.cookies[this.config.auth.cookie_name]
+			var new_token            = this.auth.refreshToken( authentication_token )
+			if ( new_token == null || new_token == undefined ) {
+				response.status(401).end()
+			}
+			response.cookie(this.config.auth.cookie_name, new_token, this.config.auth.cookie_options)
+		}
+
+		next()
 	})
 }
 

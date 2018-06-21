@@ -21,14 +21,9 @@ Auth.prototype.createToken = function(data, key) {
 	})
 }
 Auth.prototype.refreshToken = function(token, key) {
-	if ( typeof key == "undefined" ) {
-		var jwt_key = this.config.keys.aes
-	} else {
-		var jwt_key = this.config.keys[key]
-	}
-	let decoded = this.validateToken(token, jwt_key)
+	let decoded = this.validateToken(token, key)
 	if ( decoded == null ) { return null }
-	return this.createToken(data, jwt_key)
+	return this.createToken(data, key)
 }
 Auth.prototype.validateToken = function(token, key) {
 	if ( typeof key == "undefined" ) {
@@ -36,10 +31,11 @@ Auth.prototype.validateToken = function(token, key) {
 	} else {
 		var jwt_key = this.config.keys[key]
 	}
+	var session_expires = typeof this.config.session_expires == "undefined" ? 60*60 : config.session_expires;
 	try {
 		var decoded = jwt.verify( token, jwt_key, {
 			algorithms: ["HS512"],
-			maxAge: this.config.session_expires
+			maxAge: session_expires
 		})
 		return decoded.data
 	} catch (e) {
